@@ -14,6 +14,8 @@ namespace HideDialogText
     {
         private GameObject DialogManagerGO;
 
+        private bool toggled = false;
+
         public HideDialogText() : base("HideDialogText") { }
 
         public override string GetVersion()
@@ -25,15 +27,9 @@ namespace HideDialogText
         {
             Log("Initializing");
 
-            On.HeroController.Awake += HeroAwake;
             On.HeroController.Update += HeroUpdate;
 
             Log("Initialized");
-        }
-
-        private void HeroAwake(On.HeroController.orig_Awake orig, HeroController self)
-        {
-            orig(self);
         }
 
         private void HeroUpdate(On.HeroController.orig_Update orig, HeroController self)
@@ -41,10 +37,15 @@ namespace HideDialogText
             orig(self);
             if (Input.GetKeyDown(KeyCode.F3))
             {
+                toggled = !toggled;
                 DialogManagerGO = GameObject.Find("DialogueManager");
 
-                foreach (var r in DialogManagerGO.GetComponentsInChildren<Renderer>(true))
-                    r.enabled = !r.enabled;
+                /* A "hacky" way to hide the text without deactivating the game object as 
+                you would stuck talking to the NPC */
+                if (toggled)
+                    DialogManagerGO.transform.localScale = Vector3.zero;
+                else
+                    DialogManagerGO.transform.localScale = Vector3.one;
 
                 Log($"Toggled! {DialogManagerGO.activeSelf}");
             }
